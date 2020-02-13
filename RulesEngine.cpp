@@ -5,6 +5,7 @@
 #include <sstream>
 #include <algorithm>
 #include <limits.h>
+#include <stdlib.h>
 
 
 using namespace std;
@@ -20,7 +21,6 @@ public:
   }
   void display()
   {
-    cout<<"person class created"<<endl;
     cout<<this->credit_score<<endl;
     cout<<this->state<<endl;
   }
@@ -39,106 +39,104 @@ public:
   }
   void display()
   {
-    cout<<this->interest_rate<<endl;
-    cout<<this->disqualified<<endl;
+    cout<<"product.interest_rate:"<<this->interest_rate<<endl;
+    cout<<"product.disqualified:"<<((this->disqualified)?"true":"false")<<endl;
   }
 };
 
 class RulesEngine{
 public:
-  void runRules(Person& p,Product& pr, stringstream& rules)
+  void runRules(Person& p,Product& pr, vector<string> rules)
   {
     string line;
-    while ( getline (rules,line) )
+    for (int i=0; i<rules.size();i++)
     {
-      line.erase(remove( line.begin(), line.end(), '\"' ),
-                 line.end());
-      cout << line << '\n';
-      vector <string> tokens;
-      // stringstream class check1
+      line=rules[i];
+      line.erase(remove(line.begin(),line.end(),'\"' ),line.end());
+      vector<string> tokens;
       stringstream check1(line);
       string intermediate;
+ 
       // Tokenizing w.r.t. to ";""
       while(getline(check1, intermediate, ';'))
       {
         tokens.push_back(intermediate);
       }
-      // Printing the token vector
-      for(int i = 0; i < tokens.size(); i++)
+      //Condition to check the state
+      if(tokens[0] == "check_state")
       {
-        cout << tokens[i] << '\n';
-        
-        
-        //Condition to check the state
-        if(tokens[i] == "check_state")
+        string state = tokens[1];
+        if(p.state == state)
         {
-          string str = tokens[1];
-          if(p.state == str)
-          {
-            pr.disqualified = true;
-          }
+          pr.disqualified = true;
         }
-        //Condition to check score greater than 720
-        if(tokens[i] == "check_score_greater")
+      }
+      //Condition to check score greater than 720
+      if(tokens[0] == "check_score_greater")
+      {
+        int score = stoi(tokens[1]);
+        double rate;
+        stringstream ss(tokens[2]);
+        ss >> rate;
+        if(p.credit_score >= score)
         {
-          int str = stoi(tokens[1]);
-          if(p.credit_score >= str)
-          {
-            pr.interest_rate-=0.3;
-            
-          }
+          pr.interest_rate-=rate;
         }
-        //Condition to check score less than 720
-        if(tokens[i] == "check_score_lesser")
+      }
+      //Condition to check score less than 720
+      if(tokens[0] == "check_score_lesser")
+      {
+        int score = stoi(tokens[1]);
+        double rate;
+        stringstream ss(tokens[2]);
+        ss >> rate;
+        if(p.credit_score < score)     
         {
-          int str = stoi(tokens[1]);
-          if(p.credit_score < str)
-          {
-            pr.interest_rate+=0.5;
-            
-          }
+          pr.interest_rate+=rate;
         }
-        //Condition to check product name 7-1 ARM
-        if(tokens[i] == "check_product_name")
+      }
+      //Condition to check product name 7-1 ARM
+      if(tokens[0] == "check_product_name")
+      {
+        string name = (tokens[1]);
+        double rate;
+        stringstream ss(tokens[2]);
+        ss >> rate;
+        if(pr.name == name)
         {
-          string str1 = (tokens[1]);
-          cout<<pr.name<<":"<<str1<<endl;
-          if(pr.name == str1)
-          {
-            pr.interest_rate+=0.5;
-            
-          }
+          pr.interest_rate+=rate;
         }
       }
     }
   }
 };
 
-stringstream loadRules(){
-  ifstream myfile ("file.txt");
-  stringstream sstream;
+vector<string> loadRules(){
+  ifstream myfile ("rules.txt");
+  vector<string> rulesString; 
+  string line;
   if (myfile.is_open()){
-    sstream << myfile.rdbuf();
+    while(getline(myfile,line)){
+      rulesString.push_back(line);
+    }
   }
   myfile.close();
-  return sstream;
+  return rulesString;
 }
 
 int main()
 {
   int score;
   string state, name, line;
-  std::cin.clear();
   cout<<"enter the credit_score and state of person"<<endl;
   cin>>score>>state;
-  std::cin.clear();
   cout<<"enter name of product "<<endl;
   cin.ignore();
   getline(cin,name);
   
   Person *person=new Person(score,state);
   Product *product = new Product(5.0,false,name);
-  stringstream rules= loadRules();
+  vector<string> rules = loadRules();
   RulesEngine *rules_engine = new RulesEngine();
   rules_engine->runRules(*person,*product,rules);
   product->display();

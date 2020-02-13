@@ -1,0 +1,4 @@
+"check_state;florida;true"
+"check_score_greater;720;0.3"
+"check_score_lesser;720;0.5"
+"check_product_name;7-1 ARM;0.5"

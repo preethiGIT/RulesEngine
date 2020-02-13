@@ -10,9 +10,10 @@
 using namespace std;
 
 class Person{
-public:
+  friend class RulesEngine;
   int credit_score;
   string state;
+public:
   Person(int cs, string s)
   {
     credit_score = cs;
@@ -26,10 +27,11 @@ public:
 };
 
 class Product{
-public:
+  friend class RulesEngine;
   double interest_rate;
   bool disqualified;
   string name;
+public:
   Product(double ir, bool d, string n)
   {
     interest_rate = ir;

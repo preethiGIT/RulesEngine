@@ -7,7 +7,6 @@
 #include <limits.h>
 #include <stdlib.h>
 
-
 using namespace std;
 
 class Person{
@@ -71,7 +70,7 @@ public:
           pr.disqualified = true;
         }
       }
-      //Condition to check score greater than 720
+      //Condition to check score greater than or equal to 720
       if(tokens[0] == "check_score_greater")
       {
         int score = stoi(tokens[1]);
